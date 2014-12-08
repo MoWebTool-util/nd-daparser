@@ -2,33 +2,6 @@ module.exports = function(grunt) {
 
   'use strict';
 
-  function parseAlias(prefix) {
-    var fs = require('fs');
-    var path = require('path');
-
-    var root = 'spm_modules';
-
-    var alias = [];
-
-    if (prefix) {
-      prefix += '/';
-    } else {
-      prefix = '';
-    }
-
-    fs.readdirSync(root).forEach(function(dest) {
-      var version = fs.readdirSync(path.join(root, dest))[0];
-      var spmmain = fs.readFileSync(path.join(root, dest, version, 'package.json'));
-
-      // 移除多余的 `./`
-      spmmain = JSON.parse(spmmain).spm.main.replace(/^\.\//, '');
-
-      alias.push('\'' + dest + '\': \'' + prefix + root + '/' + dest + '/' + version + '/' + spmmain + '\'');
-    });
-
-    return alias.join(',\n      ');
-  }
-
   // load all grunt tasks
   require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
 
@@ -55,23 +28,6 @@ module.exports = function(grunt) {
       }
     },
 
-    copy: {
-      config: {
-        options: {
-          process: function(content /*, srcpath*/ ) {
-            return content.replace(/@ALIAS/g, parseAlias());
-          }
-        },
-        files: [{
-          expand: true,
-          cwd: 'examples/lib',
-          src: ['config.js.tpl'],
-          dest: 'examples/lib',
-          ext: '.js'
-        }]
-      }
-    },
-
     exec: {
       'spm-publish': 'spm publish',
       'spm-test': 'spm test'
@@ -83,7 +39,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('publish', ['test', 'exec:spm-publish']);
 
-  grunt.registerTask('server', ['copy', 'wrap']);
+  grunt.registerTask('server', ['wrap']);
 
   grunt.registerTask('default', ['server']);
 
