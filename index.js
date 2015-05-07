@@ -32,22 +32,15 @@ function normalizeValue(val) {
 
 // 解析并归一化配置中的值
 function normalizeValues(data) {
-  for (var key in data) {
-    if (data.hasOwnProperty(key)) {
+  Object.keys(data).forEach(function(key) {
+    var val = data[key];
 
-      var val = data[key];
-      if (typeof val !== 'string') {
-        continue;
-      }
-
-      if (JSON_LITERAL_PATTERN.test(val)) {
-        val = val.replace(/'/g, '"');
-        data[key] = normalizeValues(JSON.parse(val));
-      } else {
-        data[key] = normalizeValue(val);
-      }
+    if (typeof val === 'string') {
+      data[key] = JSON_LITERAL_PATTERN.test(val) ?
+        normalizeValues(JSON.parse(val.replace(/'/g, '"'))) :
+        normalizeValue(val);
     }
-  }
+  });
 
   return data;
 }
@@ -71,15 +64,11 @@ exports.parseElement = function(element, raw) {
       dataset[key] = element.dataset[key];
     });
   } else if ((attrs = element.attributes)) {
-    for (var i = 0, len = attrs.length; i < len; i++) {
-      var attr = attrs[i];
-      var name = attr.name;
-
-      if (name.indexOf('data-') === 0) {
-        name = camelCase(name.substring(5));
-        dataset[name] = attr.value;
+    Array.prototype.forEach.call(element.attributes, function(attr) {
+      if (attr.name.indexOf('data-') === 0) {
+        dataset[camelCase(attr.name.substring(5))] = attr.value;
       }
-    }
+    });
   }
 
   return raw === true ? dataset : normalizeValues(dataset);
