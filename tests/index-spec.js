@@ -10,7 +10,7 @@ describe('DAParser', function() {
 
   it('single data-xx', function() {
     var div = $('<div data-key="value"></div>').appendTo(body);
-    var dataset = DAParser.parseElement(div);
+    var dataset = DAParser.parseElement(div[0]);
 
     expect(dataset.key).to.equal('value');
 
@@ -19,7 +19,7 @@ describe('DAParser', function() {
 
   it('multi data-xx', function() {
     var div = $('<div data-key="value" data-key2="val2"></div>').appendTo(body);
-    var dataset = DAParser.parseElement(div);
+    var dataset = DAParser.parseElement(div[0]);
 
     expect(dataset['key']).to.equal('value');
     expect(dataset['key2']).to.equal('val2');
@@ -29,7 +29,7 @@ describe('DAParser', function() {
 
   it('convert dash-name to camelCasedName', function() {
     var div = $('<div data-x-y-123a-_B="val" data-x-y="val" data-AbcD-x="val"></div>').appendTo(body);
-    var dataset = DAParser.parseElement(div);
+    var dataset = DAParser.parseElement(div[0]);
 
     //console.dir(div[0].dataset)
     //console.dir(dataset)
@@ -58,7 +58,7 @@ describe('DAParser', function() {
 
   it('object', function() {
     var div = $('<div data-object="{\'a\':\'a\', \'b\':1}"></div>').appendTo(body);
-    var dataset = DAParser.parseElement(div);
+    var dataset = DAParser.parseElement(div[0]);
 
     expect(dataset['object']).to.eql({a:'a', b: 1});
     div.remove();

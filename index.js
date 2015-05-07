@@ -6,14 +6,11 @@
 // fork from:
 //  - https://github.com/aralejs/widget/blob/master/src/daparser.js
 
-var $ = require('jquery');
-
 // Helpers
 // ------
 
 var RE_DASH_WORD = /-([a-z])/g;
 var JSON_LITERAL_PATTERN = /^\s*[\[{].*[\]}]\s*$/;
-var parseJSON = window.JSON ? JSON.parse : $.parseJSON;
 
 // 将 'false' 转换为 false
 // 'true' 转换为 true
@@ -21,11 +18,9 @@ var parseJSON = window.JSON ? JSON.parse : $.parseJSON;
 function normalizeValue(val) {
   if (val.toLowerCase() === 'false') {
     val = false;
-  }
-  else if (val.toLowerCase() === 'true') {
+  } else if (val.toLowerCase() === 'true') {
     val = true;
-  }
-  else if (/\d/.test(val) && /[^a-z]/i.test(val)) {
+  } else if (/\d/.test(val) && /[^a-z]/i.test(val)) {
     var number = parseFloat(val);
     if (number + '' === val) {
       val = number;
@@ -47,9 +42,8 @@ function normalizeValues(data) {
 
       if (JSON_LITERAL_PATTERN.test(val)) {
         val = val.replace(/'/g, '"');
-        data[key] = normalizeValues(parseJSON(val));
-      }
-      else {
+        data[key] = normalizeValues(JSON.parse(val));
+      } else {
         data[key] = normalizeValue(val);
       }
     }
@@ -65,21 +59,18 @@ function camelCase(str) {
   });
 }
 
-
-
 // 得到某个 DOM 元素的 dataset
 exports.parseElement = function(element, raw) {
-  element = $(element)[0];
   var dataset = {};
+  var attrs = {};
 
   // ref: https://developer.mozilla.org/en/DOM/element.dataset
   if (element.dataset) {
     // 转换成普通对象
-    dataset = $.extend({}, element.dataset);
-  }
-  else {
-    var attrs = element.attributes;
-
+    Object.keys(element.dataset).forEach(function(key) {
+      dataset[key] = element.dataset[key];
+    });
+  } else if ((attrs = element.attributes)) {
     for (var i = 0, len = attrs.length; i < len; i++) {
       var attr = attrs[i];
       var name = attr.name;
